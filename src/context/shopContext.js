@@ -41,12 +41,21 @@ const ShopProvider = ({children}) => {
     }
   }, [])
 
-  const addItemToCheckout = async () => {
+  const addItemToCheckout = async (variantId, quantity) => {
+    const lineItemsToAdd = [
+      {
+        variantId,
+        quantity: parseInt(quantity, 10)
+      }
+    ];
 
+    const checkout = await client.checkout.addLineItems(state.checkout.id, lineItemsToAdd)
+    setState((preState) => ({...preState, checkout}))
   }
 
   const removeLineItem = async (lineItemIdsToRemove) => {
-
+    const checkout = await client.checkout.removeLineItems(state.checkout.id, lineItemIdsToRemove)
+    setState((preState) => ({...preState, checkout}))
   }
 
   // fetch all products in the shop
@@ -63,20 +72,19 @@ const ShopProvider = ({children}) => {
   }
 
   const closeCart = () => {
-
+    setState((preState) => ({...preState, isCartOpen: false}))
   }
 
   const openCart = () => {
-    
+    setState((preState) => ({...preState, isCartOpen: true}))
   }
 
-  
   const closeMenu = () => {
-
+    setState((preState) => ({...preState, isMenuOpen: false}))
   }
 
   const openMenu = () => {
-    
+    setState((preState) => ({...preState, isMenuOpen: true}))
   }
 
   return (
@@ -98,10 +106,10 @@ const ShopProvider = ({children}) => {
 
 export default ShopProvider
 
-// shopify-buy
+// https://www.npmjs.com/package/shopify-buy#initializing-the-client
+
+// package: shopify-buy
 // It's based on Shopify's Storefront API 
 // and provides the ability to retrieve products and collections 
-//from your shop, 
-// add products to a cart, and checkout.
+// from your shop, add products to a cart, and checkout.
 
-// https://www.npmjs.com/package/shopify-buy#initializing-the-client
