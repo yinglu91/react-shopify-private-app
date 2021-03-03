@@ -9,14 +9,13 @@ const client = Client.buildClient({
   storefrontAccessToken: process.env.REACT_APP_SHOPIFY_API,
 });
 
-const ShopProvider = ({children}) => {
-  const [state, setState] = useState({
-    product: {},
-    products: [],
-    checkout: {},
-    isCartOpen: false,
-    isMenuOpen: false
-  })
+const ShopProvider = ({ children }) => {
+  const [product, setProduct] = useState({})
+  const [products, setProducts] = useState([])
+  const [checkout, setCheckout] = useState({})
+
+  const [isCartOpen, setIsCartOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const createCheckout = async () => {
     // Create an empty checkout
@@ -24,12 +23,12 @@ const ShopProvider = ({children}) => {
     console.log('checkout: ', checkout)
 
     localStorage.setItem('checkoutId', checkout.id)
-    setState((preState) => ({...preState, checkout}))
+    setCheckout(checkout)
   }
 
   const fetchCheckout = async (checkoutId) => {
     const checkout = await client.checkout.fetch(checkoutId)
-    setState((preState) => ({...preState, checkout}))
+    setCheckout(checkout)
   }
 
   useEffect(() => {
@@ -49,47 +48,52 @@ const ShopProvider = ({children}) => {
       }
     ];
 
-    const checkout = await client.checkout.addLineItems(state.checkout.id, lineItemsToAdd)
-    setState((preState) => ({...preState, checkout}))
+    const checkout = await client.checkout.addLineItems(checkout.id, lineItemsToAdd)
+    setCheckout(checkout)
   }
 
   const removeLineItem = async (lineItemIdsToRemove) => {
-    const checkout = await client.checkout.removeLineItems(state.checkout.id, lineItemIdsToRemove)
-    setState((preState) => ({...preState, checkout}))
+    const checkout = await client.checkout.removeLineItems(checkout.id, lineItemIdsToRemove)
+    setCheckout(checkout)
   }
 
   // fetch all products in the shop
   const fetchAllProducts = async () => {
     const products = await client.product.fetchAll()
-    setState((preState) => ({...preState, products}))
+    setProducts(products)
   }
 
 
   // handle is the name of product compatable with link
   const fetchProductWithHandle = async (handle) => {
     const product = await client.product.fetchByHandle(handle)
-    setState((preState) => ({...preState, product}))
+    setProduct(product)
   }
 
   const closeCart = () => {
-    setState((preState) => ({...preState, isCartOpen: false}))
+    setIsCartOpen(false)
   }
 
   const openCart = () => {
-    setState((preState) => ({...preState, isCartOpen: true}))
+    setIsCartOpen(true)
   }
 
   const closeMenu = () => {
-    setState((preState) => ({...preState, isMenuOpen: false}))
+    setIsMenuOpen(false)
   }
 
   const openMenu = () => {
-    setState((preState) => ({...preState, isMenuOpen: true}))
+    setIsMenuOpen(true)
   }
 
   return (
     <ShopContext.Provider value={{
-      ...state,
+      product,
+      products,
+      checkout,
+      isCartOpen,
+      isMenuOpen,
+    
       fetchAllProducts,
       fetchProductWithHandle,
       addItemToCheckout,
